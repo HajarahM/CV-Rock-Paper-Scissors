@@ -4,6 +4,7 @@ import numpy as np
 import random
 import time
 
+
 #Definitions for Camera User Input 
 model = load_model('keras_model.h5')
 cap = cv2.VideoCapture(0)
@@ -12,37 +13,35 @@ prediction = model.predict(data)
 
 start_time = time.time()
 # User input from Camera
-class UserCameraInput():
-    def get_prediction():
-        while True:
-            ret, frame = cap.read()
-            resized_frame = cv2.resize(frame, (224, 224), interpolation = cv2.INTER_AREA)
-            image_np = np.array(resized_frame)
-            normalized_image = (image_np.astype(np.float32) / 127.0) - 1 # Normalize the image
-            data[0] = normalized_image
-            cv2.imshow('frame', frame)
-            if prediction [0][0] > 0.6:
-                print('Rock')
-            elif prediction [0][1] > 0.6:
-                print('Paper')
-            elif prediction [0][2] > 0.6:
-                print('Scissors')
-            else:
-                print('Nothing')
+def get_prediction():
+    while True:
+        ret, frame = cap.read()
+        resized_frame = cv2.resize(frame, (224, 224), interpolation = cv2.INTER_AREA)
+        image_np = np.array(resized_frame)
+        normalized_image = (image_np.astype(np.float32) / 127.0) - 1 # Normalize the image
+        data[0] = normalized_image
+        cv2.imshow('frame', frame)
+        if prediction [0][0] > 0.6:
+            print('Rock')
+        elif prediction [0][1] > 0.6:
+            print('Paper')
+        elif prediction [0][2] > 0.6:
+            print('Scissors')
+        else:
+            print('Nothing')
            
-            # Press q to close the window
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        # After the loop release the cap object
-        cap.release()
-        # Destroy all the windows
-        cv2.destroyAllWindows()
-end_time = time.time()  
+        # Press q to close the window
+        if cv2.waitKey(10) & 0xFF == ord('q'):
+            break
+    # After the loop release the cap object
+    cap.release()
+    # Destroy all the windows
+    cv2.destroyAllWindows()
 
 # Choices
 action_choice = ["Rock", "Paper", "Scissors"]
 computer_choice = random.choice(action_choice)
-user_choice = UserCameraInput()
+user_choice = get_prediction()
 
 #Game functions
 class GameChoices():
@@ -52,8 +51,8 @@ class GameChoices():
         user_choice
 game_choices = GameChoices()
 
-user_win = 0
-computer_win = 0
+user_wins = 0
+computer_wins = 0
 
 class GetWinner ():
     def get_winner ():
@@ -61,29 +60,29 @@ class GetWinner ():
             print (f"Both players selected {user_choice}. It's a tie!")
         elif user_choice == "Rock":
             if computer_choice == "Scissors":
-                user_win = user_win+1
+                user_wins = user_wins+1
                 print ("Rock beats Scissors! You win!")
             else:
-                computer_win = computer_win+1
+                computer_wins = computer_wins+1
                 print ("Paper covers Rock! You lose.")
         elif user_choice == "Paper":
             if computer_choice == "Rock":
-                user_win = user_win+1
+                user_wins = user_wins+1
                 print("Paper covers Rock! You win!")
             else:
-                computer_win = computer_win+1
+                computer_wins = computer_wins+1
                 print("Scissors cuts Paper! You lose.")
         elif user_choice == "Scissors":
             if computer_choice == "Paper":
-                user_win = user_win+1
+                user_wins = user_wins+1
                 print("Scissors cuts paper! You win!")
             else:
-                computer_win = computer_win+1
+                computer_wins = computer_wins+1
                 print("Rock beats Scissors! You lose.")
 winner = GetWinner()
 
 #counter
-game_time = end_time - start_time
+game_time = time.time() - start_time
 
 class LetsPlay():
     def play_timer ():
@@ -94,6 +93,19 @@ class LetsPlay():
             winner
         else:
             print("Not yet time to play")
+    def play_again (play_timer):
+        if user_wins < 3 and computer_wins < 3:
+            play_timer
+        elif user_wins == 3 and computer_wins < user_wins:
+            print ("You Win the Game, Goodbye")
+        elif computer_wins == 3 and user_wins < computer_wins:
+            print ("I Win the Game, Goodbye")
+        else:
+            print ("GAME OVER")
+
+Play = LetsPlay ()
+
+Play
 
   
         
