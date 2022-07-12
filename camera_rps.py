@@ -9,50 +9,63 @@ import time
 model = load_model('keras_model.h5')
 cap = cv2.VideoCapture(0)
 data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
-prediction = model.predict(data)
-
-start_time = time.time()
-# User input from Camera
-def get_prediction():
-    while True:
-        ret, frame = cap.read()
-        resized_frame = cv2.resize(frame, (224, 224), interpolation = cv2.INTER_AREA)
-        image_np = np.array(resized_frame)
-        normalized_image = (image_np.astype(np.float32) / 127.0) - 1 # Normalize the image
-        data[0] = normalized_image
-        cv2.imshow('frame', frame)
-        if prediction [0][0] > 0.6:
-            print('Rock')
-        elif prediction [0][1] > 0.6:
-            print('Paper')
-        elif prediction [0][2] > 0.6:
-            print('Scissors')
-        else:
-            print('Nothing')
-           
-        # Press q to close the window
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
-    # After the loop release the cap object
-    cap.release()
-    # Destroy all the windows
-    cv2.destroyAllWindows()
-
+countdown_timer = 5
+user_wins = 0
+computer_wins = 0
 # Choices
 action_choice = ["Rock", "Paper", "Scissors"]
 computer_choice = random.choice(action_choice)
+
+#start camera video input
+def start_video ():
+    ret, frame = cap.read()
+    resized_frame = cv2.resize(frame, (224, 224), interpolation = cv2.INTER_AREA)
+    image_np = np.array(resized_frame)
+    normalized_image = (image_np.astype(np.float32) / 127.0) - 1 # Normalize the image
+    data[0] = normalized_image
+    prediction = model.predict(data)
+    cv2.imshow('frame', frame)
+
+    # Press q to close the window
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        stop_video()
+
+#Timer after start video
+#Countdown Timer
+def start_timer():
+    while countdown_timer:
+        mins, secs = divmod(countdown_timer,60)
+        timer = '{02d}:{02d}'.format(mins, secs)
+        print (timer, end="\r")
+        time.sleep(1)
+        countdown_timer -= 1
+    print ('Show your hand - Rock, Paper or Scissors?')
+    ret, frame = cap.read()
+    resized_frame = cv2.resize(frame, (224, 224), interpolation = cv2.INTER_AREA)
+    image_np = np.array(resized_frame)
+    normalized_image = (image_np.astype(np.float32) / 127.0) - 1 # Normalize the image
+    data[0] = normalized_image
+    prediction = model.predict(data)
+    get_prediction()
+#game_timer function call 'start_timer(int(coundown_timer))'
+
+
+# User input from Camera
+def get_prediction():
+    prediction = model.predict(data)
+    max_probability = np.argmax(prediction[0])
+    return max_probability
+
 user_choice = get_prediction()
 
 #Game functions
 class GameChoices():
     def get_computer_choice ():
-        computer_choice
-    def get_user_choice ():
-        user_choice
+        print (computer_choice)
+    def get_user_choice():
+        user_choice = get_prediction()
+        print (user_choice)
 game_choices = GameChoices()
-
-user_wins = 0
-computer_wins = 0
 
 class GetWinner ():
     def get_winner ():
@@ -81,29 +94,35 @@ class GetWinner ():
                 print("Rock beats Scissors! You lose.")
 winner = GetWinner()
 
-#counter
-game_time = time.time() - start_time
+def stop_video():
+    # After the loop release the cap object
+    cap.release()
+    # Destroy all the windows
+    cv2.destroyAllWindows()
 
-class LetsPlay():
+class LetsPlay ():
     def play_timer ():
-        if game_time == 5:
-            print ("It's game time, enter your choice")
-            game_choices
-            print(f"\n Computer chose {computer_choice}, You chose {user_choice}.\n")
-            winner
-        else:
-            print("Not yet time to play")
+        start_timer(int(countdown_timer))
     def play_again (play_timer):
         if user_wins < 3 and computer_wins < 3:
+            start_video
             play_timer
+            game_choices
+            winner
         elif user_wins == 3 and computer_wins < user_wins:
             print ("You Win the Game, Goodbye")
+            stop_video
         elif computer_wins == 3 and user_wins < computer_wins:
             print ("I Win the Game, Goodbye")
+            stop_video
         else:
             print ("GAME OVER")
+            stop_video
 
 Play = LetsPlay ()
+
+if __name__ == '__main__':
+    LetsPlay()
 
 Play
 
