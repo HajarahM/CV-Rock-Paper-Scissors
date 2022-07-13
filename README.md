@@ -43,4 +43,8 @@ The 'random' module was imported to facilitate the computer to make a random sel
 
 ##### Component 4: Wins and Losses
 
+The get_winner function uses the if-else methodology to compare the user and computer input choices to determine the winner. It then keeps count of the number of wins. The ultimate winner is the one who gets to 3 wins first.
+
 ##### Component 5: End Game
+
+The game is ended in one of 3 ways; upon getting to the ultimate winner, or after 6 rounds, or ended by the user by pressing q for Quit.
